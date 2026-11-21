@@ -1,6 +1,6 @@
 # finetune-inkling-2-mini
 
-**Fine-tune Inkling 2 Mini on Tinker, then use it there, serve it in LM Studio, or publish it. Adapted from the Inkling 2 Small recipe behind Tess-4.5-594B-A17B.**
+**Fine-tune Inkling 2 Mini on Tinker, then serve it in LM Studio or publish it.** Adapted from Migel Tissera's Inkling 2 Small recipe — the one behind Tess-4.5-594B-A17B.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-agentskills.io-black)](https://agentskills.io)
@@ -10,12 +10,12 @@
 Inkling 2 Mini is a 26B-parameter Mixture-of-Experts model with 5.4B active
 parameters, a million-token window and effort-controlled reasoning. You can
 fine-tune it on Tinker in an afternoon. Getting a fine-tune that behaves well, works
-at long context, and runs outside Tinker when you want it to has traps that cost us
+at long context, and runs outside Tinker when you want it to has traps that cost
 real runs:
 - a tokenizer that silently changed,
 - experts stored in 4-bit that a normal LoRA cannot be merged into,
 - a 64K cap that counts output tokens,
-- a reasoning effort that moved our benchmark score by 18 points.
+- a reasoning effort that moved the benchmark score by 18 points on the original run.
 
 This skill hands your coding agent the whole path, with each of those decisions
 made explicit and every step scripted. Install it and say *"fine-tune Inkling 2
@@ -40,8 +40,8 @@ are labelled as such — re-measure on Mini.
 | **Tokenizer.** Inkling 2 uses H200K; earlier Inklings use o200k | An old renderer package used the wrong one without an error; "64K" rows overflowed by up to 16K tokens | One shared rendering path that asserts H200K; every row measured with it |
 | **4-bit experts.** The open checkpoint stores experts in NVFP4 (modelopt) | A LoRA on the experts cannot be merged without lossy requantization | `--adapter release`: attention + unembed LoRA, merged exactly in FP32; a merge script that refuses anything else |
 | **Caps count output.** 65,536 / 262,144 on Tinker | An agent's first request plus 16K of output room is rejected | Train at 64K, transplant the adapter to 256K in seconds, no retraining |
-| **Agent data says "start working".** 112 of 113 sessions opened with a tool call | The fine-tune calls tools on "Hey there!" | A self-distilled conversational slice from the base, and a probe for every checkpoint |
-| **Effort is a dial.** Rows are trained at one effort | 70.6% at `high`, 88.2% at `xhigh`, same model, same tasks | Effort fixed in training, swept in evaluation |
+| **Agent data says "start working".** 112 of 113 sessions in the original run's data opened with a tool call | The fine-tune calls tools on "Hey there!" | A self-distilled conversational slice from the base, and a probe for every checkpoint |
+| **Effort is a dial.** Rows are trained at one effort | 70.6% at `high`, 88.2% at `xhigh` on the Small run — same model, same tasks | Effort fixed in training, swept in evaluation |
 | **"Lossless" is a claim** | A wrong scale or a skipped shard looks fine until it doesn't | Per-token logprob comparison of the served merge against the Tinker adapter |
 
 ## The workflow
